@@ -8,8 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-//const sourceFileName = "/proc/cpuinfo"
-const sourceFileName = "/Users/alex/temp/2020-07-02/cpuinfo.txt"
+const sourceFileName = "/proc/cpuinfo"
 
 var regexps = map[string]*regexp.Regexp{
 	"vendor":     regexp.MustCompile("^vendor_id\\s+:\\s(?P<vendor>.*$)"),
