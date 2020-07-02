@@ -5,7 +5,6 @@ import (
 	"crypto/sha512"
 	"encoding/binary"
 	"encoding/hex"
-	"encoding/json"
 	"strconv"
 	"strings"
 )
@@ -27,12 +26,26 @@ func Get() (info *CPUInfo, err error) {
 }
 
 // Sum - возвращает контрольную сумму информации о процессоре
-func (info *CPUInfo) Sum() [64]byte {
-	data, err := json.Marshal(info)
-	if err != nil {
-		panic(err)
-	}
-	return sha512.Sum512(data)
+func (info *CPUInfo) Sum() []byte {
+	hash := sha512.New()
+
+	hash.Write([]byte(info.Vendor))
+
+	familyBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(familyBytes, uint64(info.Family))
+	hash.Write(familyBytes)
+
+	modelBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(modelBytes, uint64(info.Model))
+	hash.Write(modelBytes)
+
+	hash.Write([]byte(info.ModelName))
+
+	/*coreCountBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(coreCountBytes, uint64(info.CoreCount))
+	hash.Write(coreCountBytes)*/
+
+	return hash.Sum(nil)
 }
 
 func fromMap(m map[string]string) (info *CPUInfo) {
