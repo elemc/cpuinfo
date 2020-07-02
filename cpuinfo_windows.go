@@ -1,7 +1,7 @@
 package cpuinfo
 
 import (
-	"os"
+	"bytes"
 	"os/exec"
 	"regexp"
 
@@ -9,11 +9,11 @@ import (
 )
 
 var regexps = map[string]*regexp.Regexp{
-	"vendor":     regexp.MustCompile("^Manufacturer\\n(?P<vendor>.*$)"),
-	"family":     regexp.MustCompile("^Caption\\n.*\\sFamily\\s(?P<family>\\d).*$"),
-	"model":      regexp.MustCompile("^Caption\\n.*Model\\s(?P<model>\\d+).*$"),
-	"model_name": regexp.MustCompile("^Name\\n(?P<model_name>.*$)"),
-	"core_count": regexp.MustCompile("^NumberOfCores\\n(?P<core_count>.*$)"),
+	"vendor":     regexp.MustCompile("^Manufacturer\\s{0,256}\\n(?P<vendor>.*)"),
+	"family":     regexp.MustCompile("^Caption\\s{0,256}\\n.*\\sFamily\\s(?P<family>\\d).*"),
+	"model":      regexp.MustCompile("^Caption\\s{0,256}\\n.*\\sModel\\s(?P<model>\\d+).*"),
+	"model_name": regexp.MustCompile("^Name\\s{0,256}\\n(?P<model_name>.*)"),
+	"core_count": regexp.MustCompile("^NumberOfCores\\s{0,256}\\n(?P<core_count>\\d+)"),
 }
 
 func getCommandOutput(what string) (output []byte, err error) {
@@ -23,15 +23,7 @@ func getCommandOutput(what string) (output []byte, err error) {
 		err = errors.Wrapf(err, "unable to start (wmic cpu get %s)", what)
 		return
 	}
-
-	// запишем в файл для наглядности
-	f, err := os.Open(what + ".output")
-	if err != nil {
-		err = nil
-		return
-	}
-	f.Write(output)
-	f.Close()
+	output = bytes.TrimSpace(output)
 	return
 }
 
