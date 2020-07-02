@@ -1,6 +1,7 @@
 package cpuinfo
 
 import (
+	"os"
 	"os/exec"
 	"regexp"
 
@@ -22,6 +23,15 @@ func getCommandOutput(what string) (output []byte, err error) {
 		err = errors.Wrapf(err, "unable to start (wmic cpu get %s)", what)
 		return
 	}
+
+	// запишем в файл для наглядности
+	f, err := os.Open(what + ".output")
+	if err != nil {
+		err = nil
+		return
+	}
+	f.Write(output)
+	f.Close()
 	return
 }
 
@@ -37,7 +47,7 @@ func getCommandValue(what string, raw map[string]string) (err error) {
 func setValues(data []byte, raw map[string]string) {
 	for key, r := range regexps {
 		if !r.Match(data) {
-			return
+			continue
 		}
 		fields := r.FindStringSubmatch(string(data))
 		if len(fields) < 2 {
