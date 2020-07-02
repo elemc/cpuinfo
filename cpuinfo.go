@@ -56,7 +56,7 @@ func fromMap(m map[string]string) (info *CPUInfo) {
 		case "core_count":
 			info.CoreCount, _ = strconv.ParseInt(value, 10, 64)
 		case "features":
-			info.Features = strings.Split(strings.ToLower(value), "\n")
+			info.Features = strings.Split(strings.ToLower(value), " ")
 		}
 	}
 	return
