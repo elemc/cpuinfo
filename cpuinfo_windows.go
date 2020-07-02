@@ -15,7 +15,7 @@ var regexps = map[string]*regexp.Regexp{
 	"core_count": regexp.MustCompile("^NumberOfCores\\n(?P<core_count>.*$)"),
 }
 
-func getCommandOutput(wht string) (output []byte, err error) {
+func getCommandOutput(what string) (output []byte, err error) {
 	cmd := exec.Command("wmic", "cpu", "get", what)
 	output, err = cmd.CombinedOutput()
 	if err != nil {
@@ -30,14 +30,11 @@ func getCommandValue(what string, raw map[string]string) (err error) {
 	if err != nil {
 		return
 	}
-	name, value := getValue(output)
-	if name != "" {
-		raw[name] = value
-	}
+	setValues(output, raw)
 	return
 }
 
-func getValue(data []byte) (name, value string) {
+func setValues(data []byte, raw map[string]string) {
 	for key, r := range regexps {
 		if !r.Match(data) {
 			return
@@ -46,9 +43,9 @@ func getValue(data []byte) (name, value string) {
 		if len(fields) < 2 {
 			continue
 		}
-		name = key
-		value = fields[1]
+		raw[key] = fields[1]
 	}
+	return
 }
 
 func getCPUInfo() (info *CPUInfo, err error) {
